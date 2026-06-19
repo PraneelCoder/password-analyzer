@@ -1,12 +1,12 @@
-import express from 'express';
-import fs from 'fs';
-import { calculateEntropy } from './utils/entropy.js';
+const express = require('express');
+const fs = require('fs');
+const analyzeEntropy = require('./entropy'); 
 
 const app = express();
 
 
 app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: true })); // Allows us to read form data
+app.use(express.urlencoded({ extended: true })); 
 
 
 const rawData = fs.readFileSync('./data/leaked.txt', 'utf-8');
@@ -20,25 +20,30 @@ app.get('/', (req, res) => {
 
 app.post('/analyze', (req, res) => {
     const userPassword = req.body.passwordInput;
+    
+    
+    const mathResult = analyzeEntropy(userPassword);
+    
+    
+    const isCompromised = leakedSet.has(userPassword.toLowerCase());
 
     
-    if (leakedSet.has(userPassword.toLowerCase())) {
-        return res.render('index', { 
-            password: userPassword,
-            result: { compromised: true, bits: 0, poolSize: 0, status: 'Compromised' } 
-        });
-    }
+    const finalResult = {
+        bits: mathResult.bits,
+        poolSize: mathResult.poolSize,
+        crackTime: mathResult.crackTime,
+        status: isCompromised ? 'Compromised' : mathResult.status,
+        compromised: isCompromised
+    };
 
-    
-    const evaluation = calculateEntropy(userPassword);
-    
-    
     res.render('index', { 
-        password: userPassword,
-        result: { compromised: false, ...evaluation } 
+        result: finalResult, 
+        password: userPassword 
     });
 });
 
-app.listen(5000, () => {
-    console.log('Server running on http://localhost:5000');
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
