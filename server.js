@@ -9,7 +9,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true })); // Allows us to read form data
 
 
-const rawData = fs.readFileSync('./data/rockyou.txt', 'utf-8');
+const rawData = fs.readFileSync('./data/leaked.txt', 'utf-8');
 const leakedSet = new Set(rawData.split('\n').map(word => word.trim().toLowerCase()));
 
 
