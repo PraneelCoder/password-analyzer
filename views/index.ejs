@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Security Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b1120] text-slate-300 min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-slate-900 p-8 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full max-w-2xl border border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
+
+        <div class="mb-8 border-b border-slate-800 pb-6 text-center">
+            <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">Cryptographic Analyzer</h1>
+            <p class="text-sm text-slate-500 uppercase tracking-widest font-mono">Enterprise Security Evaluation</p>
+        </div>
+
+        <form action="/analyze" method="POST" class="mb-8 relative">
+            <input 
+                type="text" 
+                name="passwordInput" 
+                value="<%= password %>"
+                class="w-full px-6 py-5 rounded-xl bg-[#0f172a] border border-slate-700 text-white font-mono text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-slate-600 shadow-inner"
+                placeholder="Enter string to evaluate..."
+                autocomplete="off"
+                required
+            >
+            <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                Evaluate
+            </button>
+        </form>
+
+        <% if (result) { %>
+            <%
+                // Dynamic styling logic for the UI meter
+                let meterPct = Math.min((result.bits / 128) * 100, 100);
+                let barColor = 'bg-slate-600';
+                let textColor = 'text-slate-400';
+                
+                if (result.status === 'Compromised') { barColor = 'bg-red-600'; textColor = 'text-red-500'; meterPct = 100; }
+                else if (result.status === 'Weak') { barColor = 'bg-red-500'; textColor = 'text-red-500'; }
+                else if (result.status === 'Moderate') { barColor = 'bg-yellow-500'; textColor = 'text-yellow-500'; }
+                else if (result.status === 'Strong') { barColor = 'bg-emerald-500'; textColor = 'text-emerald-500'; }
+                else if (result.status === 'Military Grade') { barColor = 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]'; textColor = 'text-blue-400'; }
+            %>
+
+            <div class="bg-[#0f172a] rounded-xl border border-slate-800 p-1">
+                <div class="p-5 flex justify-between items-end border-b border-slate-800/50">
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Evaluation Status</p>
+                        <h2 class="text-2xl font-bold uppercase tracking-wide <%= textColor %>"><%= result.status %></h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Entropy</p>
+                        <span class="text-2xl font-mono font-bold text-white"><%= result.bits %> <span class="text-sm text-slate-500">bits</span></span>
+                    </div>
+                </div>
+
+                <div class="px-5 py-6 border-b border-slate-800/50">
+                    <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full <%= barColor %> transition-all duration-700 ease-out" style="width: <%= meterPct %>%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-px bg-slate-800/50">
+                    <div class="bg-[#0f172a] p-5">
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-semibold">Dataset Query</p>
+                        <% if (result.compromised) { %>
+                            <p class="font-mono text-sm text-red-500 font-bold">MATCH FOUND</p>
+                        <% } else { %>
+                            <p class="font-mono text-sm text-emerald-500">CLEAR</p>
+                        <% } %>
+                    </div>
+                    <div class="bg-[#0f172a] p-5">
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-semibold">Character Pool</p>
+                        <p class="font-mono text-sm text-slate-300"><%= result.poolSize %> <span class="text-slate-600">spaces</span></p>
+                    </div>
+                    <div class="bg-[#0f172a] p-5">
+                        <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-semibold">Est. Crack Time</p>
+                        <% if (result.compromised) { %>
+                            <p class="font-mono text-sm text-red-500 font-bold">Instant</p>
+                        <% } else { %>
+                            <p class="font-mono text-sm text-blue-400 font-bold"><%= result.crackTime %></p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+</body>
+</html>
